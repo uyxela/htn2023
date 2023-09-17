@@ -6,7 +6,7 @@ import { generateUuid } from "backend/utils/uuid";
 
 const authRouter = Router();
 
-authRouter.get("/login", async (req, res) => {
+authRouter.post("/login", async (req, res) => {
   const { email, password }: { email: string | null; password: string | null } =
     req.body;
 
@@ -26,7 +26,9 @@ authRouter.get("/login", async (req, res) => {
   if (!isMatch) return res.status(400).send({ error: "Incorrect password" });
 
   res.status(200).send({
-    user,
+    id: user.id,
+    name: user.name,
+    email: user.email,
     token: signJWT({
       id: user.id,
     }),
@@ -60,7 +62,7 @@ authRouter.post("/register", async (req, res) => {
 
   const hash = await bcrypt.hash(password, await bcrypt.genSalt(10));
 
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       id: generateUuid(),
       name,
@@ -69,7 +71,14 @@ authRouter.post("/register", async (req, res) => {
     },
   });
 
-  res.status(200).send({ message: "User successfully registered." });
+  res.status(200).send({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    token: signJWT({
+      id: user.id,
+    }),
+  });
 });
 
 export default authRouter;

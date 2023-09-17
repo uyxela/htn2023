@@ -14,8 +14,7 @@ model User {
     password String
 
     savedProducts Product[]
-    ratings       Rating[]
-    likes         Like[]
+    likes         Review[]
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
@@ -30,8 +29,6 @@ model Product {
     summary   String
     sentiment String
     keywords  String[]
-
-    ratings Rating[]
 
     users User[]
 
@@ -50,10 +47,10 @@ model Review {
     title   String @unique
     snippet String
 
-    product   Product @relation(fields: [productId], references: [id])
+    product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
     productId String  @map("product_id") @db.Uuid
 
-    likes Like[]
+    users User[]
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
@@ -61,32 +58,14 @@ model Review {
     @@map("reviews")
 }
 
-model Rating {
-    id String @id(map: "primary") @default(uuid()) @db.Uuid
-
-    userId String @map("user_id") @db.Uuid
-    user   User   @relation(fields: [userId], references: [id])
-
-    product   Product @relation(fields: [productId], references: [id])
-    productId String  @db.Uuid
+model Title {
+    id    String @id(map: "primary") @default(uuid()) @db.Uuid
+    title String @unique
+    name  String
+    brand String
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    @@map("ratings")
-}
-
-model Like {
-    id String @id(map: "primary") @default(uuid()) @db.Uuid
-
-    userId String @map("user_id") @db.Uuid
-    user   User   @relation(fields: [userId], references: [id])
-
-    reviewId String @map("review_id") @db.Uuid
-    review   Review @relation(fields: [reviewId], references: [id])
-
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
-
-    @@map("likes")
+    @@map("titles")
 }
