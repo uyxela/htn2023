@@ -32,8 +32,6 @@ Users can also save products to their profile and like reviews to view them late
 
 ## About The Project
 
-![Screenshot](https://github.com/uyxela/hackmit2022/blob/main/samples/screenshot.png?raw=true)
-
 Curio is a Chrome browser extension that extracts the product name and brand from a web page and searches the web for reviews about that product. It generates a summary, sentiment, and list of summarized reviews for that product and stores it in the Curio database. Users can bookmark and like products and reviews to view them later. Users can also perform searches on products and keywords to find products that match their needs, with feedback from other users to help them in their decision-making process.
 
 ### Built With
