@@ -120,6 +120,8 @@ export async function getReviewSummary(productName: string, brandName: string) {
 }
 
 export async function getSummaryKeywords(summary: string) {
+  console.log(`Extracting keywords from ${summary}`);
+
   let keywords: string[] | undefined;
 
   try {
@@ -141,6 +143,8 @@ export async function getSummaryKeywords(summary: string) {
 }
 
 export async function getSummarySentiment(summary: string) {
+  console.log(`Analyzing sentiment for ${summary}`);
+
   let sentiment: string | undefined;
 
   try {

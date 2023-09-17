@@ -226,7 +226,9 @@ extensionRouter.get("/summary-keywords", async (req, res) => {
 
   const keywords = await getSummaryKeywords(summary);
 
-  res.json(keywords.slice(2, 5));
+  const filteredKeywords = keywords.filter((keyword) => keyword.length > 4);
+
+  res.json(filteredKeywords.slice(2, 5));
 });
 
 extensionRouter.get("/summary-sentiment", async (req, res) => {
