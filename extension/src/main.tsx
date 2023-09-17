@@ -579,9 +579,11 @@ export default function Main({
                 width="20px"
                 height="20px"
                 fill={
-                  likes.some((like: any) => like.id === document.id)
-                    ? RED
-                    : LIGHT_GRAY
+                  user
+                    ? likes.some((like: any) => like.id === document.id)
+                      ? RED
+                      : LIGHT_GRAY
+                    : "white"
                 }
                 onClick={
                   document.id && user
