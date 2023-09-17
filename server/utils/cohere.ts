@@ -96,3 +96,24 @@ export async function summarizeProductReviews(
 
   return response;
 }
+
+export async function getSummaryKeywords(summary: string) {
+  let keywords: string[] | undefined;
+
+  try {
+    const response = await cohere.generate({
+      prompt: `give a comma-separated list of keywords from this:${summary}`,
+      model: "command",
+      max_tokens: 300,
+      temperature: 0,
+    });
+
+    keywords = response.body.generations[0]?.text
+      .split(",")
+      .map((keyword) => keyword.trim());
+  } catch (error: unknown) {
+    console.log(error);
+  }
+
+  return keywords ?? [];
+}

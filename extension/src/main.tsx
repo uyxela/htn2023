@@ -6,8 +6,6 @@ import { BLUE, GRAY } from "./colors";
 
 import ThumbsUp from "./assets/thumbsup.png";
 
-const TEMP_keywords = ["Mediocre Graphics", "Durable", "Hand Held"];
-
 // const TEMP_sentiment = 0;
 
 export default function Main({
@@ -19,11 +17,14 @@ export default function Main({
 }) {
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [isLoadingReview, setIsLoadingReview] = useState(true);
+  const [isLoadingKeywords, setIsLoadingKeywords] = useState(true);
 
   const [productName, setProductName] = useState("Loading...");
   const [brandName, setBrandName] = useState("Loading...");
 
   const [reviewObj, setReviewObj] = useState<string | any>("Loading...");
+
+  const [keywords, setKeywords] = useState<string[]>([]);
 
   const loadProduct = async (pageTitle: string) => {
     const response = await axios.get(
@@ -46,8 +47,18 @@ export default function Main({
     );
 
     setReviewObj(reviewResponse.data);
-    console.log(reviewResponse.data);
     setIsLoadingReview(false);
+
+    return reviewResponse.data;
+  };
+
+  const loadKeywords = async (summary: string) => {
+    const keywordsResponse = await axios.get(
+      `http://localhost:9000/extension/summary-keywords?summary=${summary}`
+    );
+
+    setKeywords(keywordsResponse.data);
+    setIsLoadingKeywords(false);
   };
 
   useEffect(() => {
@@ -60,14 +71,24 @@ export default function Main({
 
       const [productNameString, brandNameString] = await loadProduct(pageTitle);
 
-      await loadReview(productNameString, brandNameString);
+      const review = await loadReview(productNameString, brandNameString);
+
+      await loadKeywords(review.text);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isLoadingProduct && isLoadingReview) {
     return (
-      <div style={{ width: "100vw", height: "100vh" }}>
+      <div
+        style={{
+          width: "100vw",
+          height: "calc(100vh - 60px)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <Spinner color={BLUE} />
       </div>
     );
@@ -82,7 +103,7 @@ export default function Main({
       {isLoadingProduct ? (
         <div
           style={{
-            width: "100%",
+            width: "100vw",
             height: "250px", // Check this value
             display: "flex",
             justifyContent: "center",
@@ -94,16 +115,17 @@ export default function Main({
       ) : (
         <div
           style={{
-            width: "100%",
+            width: "100vw",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",
-            alignItems: "center",
+            alignItems: "flex-start",
+            paddingLeft: "40px",
           }}
         >
           <h1
             style={{
-              fontSize: "36px",
+              fontSize: "32px",
               fontWeight: 800,
             }}
           >
@@ -125,36 +147,55 @@ export default function Main({
               flexDirection: "row",
               justifyContent: "space-around",
               alignItems: "center",
+              marginTop: "20px",
             }}
           >
             <img
               style={{
-                width: "120px",
+                width: "150px",
               }}
               src={ThumbsUp}
               alt="Thumbs Up"
             />
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-start",
-                alignItems: "flex-start",
-              }}
-            >
-              {TEMP_keywords.map((keyword) => (
-                <div
-                  style={{
-                    padding: "8px",
-                    borderRadius: "999px",
-                    backgroundColor: BLUE,
-                  }}
-                >
-                  {keyword}
-                </div>
-              ))}
-            </div>
+            {isLoadingKeywords ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "250px",
+                  height: "100%",
+                }}
+              >
+                <Spinner color={BLUE} />
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                  alignItems: "flex-start",
+                  width: "250px",
+                }}
+              >
+                {keywords.map((keyword) => (
+                  <div
+                    style={{
+                      padding: "8px 16px 8px 16px",
+                      marginBottom: "4px",
+                      borderRadius: "999px",
+                      backgroundColor: BLUE,
+                      color: "white",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {keyword}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -179,6 +220,7 @@ export default function Main({
             flexDirection: "column",
             justifyContent: "flex-start",
             alignItems: "center",
+            padding: "20px 40px 20px 40px",
           }}
         >
           <p
@@ -189,6 +231,7 @@ export default function Main({
           >
             {reviewObj.text}
           </p>
+
           {reviewObj.documents.map((document: any) => (
             <div
               style={{
@@ -196,9 +239,10 @@ export default function Main({
                 flexDirection: "column",
                 justifyContent: "flex-start",
                 alignItems: "flex-start",
-                padding: "10px 20px 10px 20px",
+                padding: "30px 15px 30px 15px",
                 borderRadius: "8px",
                 border: "1px solid #2574EB",
+                margin: "15px 0 15px 0",
               }}
             >
               <a href={document.url} target="_blank" rel="noreferrer">

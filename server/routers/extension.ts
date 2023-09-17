@@ -1,6 +1,7 @@
 import {
   getBrandName,
   getProductName,
+  getSummaryKeywords,
   summarizeProductReviews,
 } from "backend/utils/cohere";
 import { Router } from "express";
@@ -21,8 +22,8 @@ extensionRouter.get("/product-details", async (req, res) => {
   ]);
 
   res.json({
-    productName,
-    brandName,
+    productName: productName?.trim(),
+    brandName: brandName?.trim(),
   });
 });
 
@@ -38,6 +39,19 @@ extensionRouter.get("/review-summary", async (req, res) => {
   const { data } = await summarizeProductReviews(productName, brandName);
 
   res.json(data);
+});
+
+extensionRouter.get("/summary-keywords", async (req, res) => {
+  const summary = req.query.summary;
+
+  if (typeof summary !== "string") {
+    res.status(400).send("Invalid summary");
+    return;
+  }
+
+  const keywords = await getSummaryKeywords(summary);
+
+  res.json(keywords.slice(2, 5));
 });
 
 export default extensionRouter;
