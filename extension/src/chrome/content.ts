@@ -1,25 +1,23 @@
-import { DOMMessage, DOMMessageResponse } from "../types/DOMMessages";
+import { DOMMessage } from "../types/DOMMessages";
 
-const messagesFromReactAppListener = (
-  msg: DOMMessage,
+const getProductNameListener = (
+  message: DOMMessage,
   _sender: chrome.runtime.MessageSender,
-  sendResponse: (response: DOMMessageResponse) => void
+  sendResponse: (response: any) => void
 ) => {
-  console.log("[content.js]. Message received", msg);
+  if (message.type === "GET_PRODUCT_NAME") {
+    const title = document.getElementById("productTitle")?.innerText;
 
-  const response: DOMMessageResponse = {
-    title: document.title,
-    headlines: Array.from(document.getElementsByTagName<"h1">("h1")).map(
-      (h1) => h1.innerText
-    ),
-  };
+    if (title) {
+      sendResponse(title);
+      return;
+    }
+  }
 
-  console.log("[content.js]. Message response", response);
-
-  sendResponse(response);
+  sendResponse(null);
 };
 
 /**
  * Fired when a message is sent from either an extension process or a content script.
  */
-chrome.runtime.onMessage.addListener(messagesFromReactAppListener);
+chrome.runtime.onMessage.addListener(getProductNameListener);

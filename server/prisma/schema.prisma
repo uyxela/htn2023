@@ -8,10 +8,84 @@ datasource db {
 }
 
 model User {
-    id           String   @id(map: "primary") @db.Uuid
-    email        String   @unique
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
-    passwordHash String
-    name         String
+    id       String @id(map: "primary") @default(uuid()) @db.Uuid
+    name     String
+    email    String @unique
+    password String
+
+    savedProducts Product[]
+    ratings       Rating[]
+    likes         Like[]
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("users")
+}
+
+model Product {
+    id        String @id(map: "primary") @default(uuid()) @db.Uuid
+    name      String
+    brand     String
+    sentiment String
+
+    ratings Rating[]
+
+    users User[]
+
+    reviews Review[]
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@unique([name, brand])
+    @@map("products")
+}
+
+model Review {
+    id       String   @id(map: "primary") @default(uuid()) @db.Uuid
+    link     String   @unique
+    title    String
+    summary  String
+    keywords String[]
+
+    product   Product @relation(fields: [productId], references: [id])
+    productId String  @map("product_id") @db.Uuid
+
+    likes Like[]
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("reviews")
+}
+
+model Rating {
+    id String @id(map: "primary") @default(uuid()) @db.Uuid
+
+    userId String @map("user_id") @db.Uuid
+    user   User   @relation(fields: [userId], references: [id])
+
+    product   Product @relation(fields: [productId], references: [id])
+    productId String  @db.Uuid
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("ratings")
+}
+
+model Like {
+    id String @id(map: "primary") @default(uuid()) @db.Uuid
+
+    userId String @map("user_id") @db.Uuid
+    user   User   @relation(fields: [userId], references: [id])
+
+    reviewId String @map("review_id") @db.Uuid
+    review   Review @relation(fields: [reviewId], references: [id])
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("likes")
 }
