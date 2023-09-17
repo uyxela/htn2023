@@ -125,6 +125,9 @@ extensionRouter.get("/search", async (req, res) => {
         },
       ],
     },
+    include: {
+      users: true,
+    },
   });
 
   res.json(products);
