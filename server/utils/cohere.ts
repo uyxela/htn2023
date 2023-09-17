@@ -59,10 +59,7 @@ export async function getBrandName(title: string) {
   return brandName;
 }
 
-export async function summarizeProductReviews(
-  productName: string,
-  brandName: string
-) {
+export async function getReviewSummary(productName: string, brandName: string) {
   console.log(`Summarizing reviews for the ${productName} by ${brandName}`);
 
   let response: any;
@@ -80,7 +77,7 @@ export async function summarizeProductReviews(
         ],
         temperature: 0,
         stream: false,
-        prompt_truncation: "OFF",
+        prompt_truncation: "AUTO",
       },
       {
         headers: {
@@ -94,7 +91,32 @@ export async function summarizeProductReviews(
     console.log(error);
   }
 
-  return response;
+  const titleSet = new Set<string>();
+
+  response.data.documents.forEach((document: any) => {
+    titleSet.add(document.title);
+  });
+
+  const filteredReviews = Array.from(titleSet).map((title) =>
+    response.data.documents.find((document: any) => document.title === title)
+  );
+
+  const linkSet = new Set<string>();
+
+  filteredReviews.forEach((review) => {
+    linkSet.add(review.url);
+  });
+
+  const finalFilteredReviews = Array.from(linkSet).map((link) =>
+    filteredReviews.find((review) => review.url === link)
+  );
+
+  const formattedResponse = {
+    summary: response.data.text,
+    reviews: finalFilteredReviews,
+  };
+
+  return formattedResponse;
 }
 
 export async function getSummaryKeywords(summary: string) {
@@ -116,4 +138,38 @@ export async function getSummaryKeywords(summary: string) {
   }
 
   return keywords ?? [];
+}
+
+export async function getSummarySentiment(summary: string) {
+  let sentiment: string | undefined;
+
+  try {
+    const response = await cohere.classify({
+      model: "embed-english-v2.0",
+      inputs: [summary],
+      examples: [
+        { text: "The order came 5 days early", label: "positive" },
+        { text: "The item exceeded my expectations", label: "positive" },
+        { text: "I ordered more for my friends", label: "positive" },
+        { text: "I would buy this again", label: "positive" },
+        { text: "I would recommend this to others", label: "positive" },
+        { text: "The package was damaged", label: "negative" },
+        { text: "The order is 5 days late", label: "negative" },
+        { text: "The order was incorrect", label: "negative" },
+        { text: "I want to return my item", label: "negative" },
+        { text: "The item's material feels low quality", label: "negative" },
+        { text: "The product arrived yesterday", label: "neutral" },
+        { text: "I used the product this morning", label: "neutral" },
+        { text: "I bought it from the website", label: "neutral" },
+        { text: "The product was okay", label: "neutral" },
+        { text: "It's not as bad as I expected", label: "neutral" },
+      ],
+    });
+
+    sentiment = response.body.classifications[0]?.prediction;
+  } catch (error: unknown) {
+    console.log(error);
+  }
+
+  return sentiment ?? "positive";
 }

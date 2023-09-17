@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import prisma from "backend/utils/prisma";
 import { signJWT } from "backend/utils/jwt";
+import { generateUuid } from "backend/utils/uuid";
 
 const authRouter = Router();
 
@@ -61,6 +62,7 @@ authRouter.post("/register", async (req, res) => {
 
   await prisma.user.create({
     data: {
+      id: generateUuid(),
       name,
       email,
       password: hash,

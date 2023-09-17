@@ -6,8 +6,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "baseUrl": ".",
     "paths": {
-      "backend/*": ["*"],
-      "common/*": ["../common/*"]
+      "backend/*": ["*"]
     }
   },
   "include": ["**/*.ts", "**/*.json"],

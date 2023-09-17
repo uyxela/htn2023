@@ -24,10 +24,12 @@ model User {
 }
 
 model Product {
-    id        String @id(map: "primary") @default(uuid()) @db.Uuid
+    id        String   @id(map: "primary") @default(uuid()) @db.Uuid
     name      String
     brand     String
+    summary   String
     sentiment String
+    keywords  String[]
 
     ratings Rating[]
 
@@ -43,11 +45,10 @@ model Product {
 }
 
 model Review {
-    id       String   @id(map: "primary") @default(uuid()) @db.Uuid
-    link     String   @unique
-    title    String
-    summary  String
-    keywords String[]
+    id      String @id(map: "primary") @default(uuid()) @db.Uuid
+    link    String @unique
+    title   String @unique
+    snippet String
 
     product   Product @relation(fields: [productId], references: [id])
     productId String  @map("product_id") @db.Uuid

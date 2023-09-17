@@ -11,6 +11,7 @@ function App() {
       style={{
         width: "100vw",
         minHeight: "100vh",
+        marginBottom: "60px",
       }}
     >
       <div
