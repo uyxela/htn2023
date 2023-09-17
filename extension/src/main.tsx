@@ -5,6 +5,8 @@ import { Spinner } from "@chakra-ui/spinner";
 import { BLUE, GRAY } from "./colors";
 
 import ThumbsUp from "./assets/thumbsup.png";
+import Think from "./assets/think.png";
+import ThumbsDown from "./assets/thumbsdown.png";
 
 // const TEMP_sentiment = 0;
 
@@ -18,13 +20,13 @@ export default function Main({
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [isLoadingReview, setIsLoadingReview] = useState(true);
   const [isLoadingKeywords, setIsLoadingKeywords] = useState(true);
+  const [isLoadingSentiment, setIsLoadingSentiment] = useState(true);
 
   const [productName, setProductName] = useState("Loading...");
   const [brandName, setBrandName] = useState("Loading...");
-
   const [reviewObj, setReviewObj] = useState<string | any>("Loading...");
-
   const [keywords, setKeywords] = useState<string[]>([]);
+  const [sentiment, setSentiment] = useState<string | null>();
 
   const loadProduct = async (pageTitle: string) => {
     const response = await axios.get(
@@ -61,6 +63,15 @@ export default function Main({
     setIsLoadingKeywords(false);
   };
 
+  const loadSentiment = async (summary: string) => {
+    const sentimentResponse = await axios.get(
+      `http://localhost:9000/extension/summary-sentiment?summary=${summary}`
+    );
+
+    setSentiment(sentimentResponse.data);
+    setIsLoadingSentiment(false);
+  };
+
   useEffect(() => {
     (async function getProductInfo() {
       const pageTitle = await getPageTitle();
@@ -73,7 +84,10 @@ export default function Main({
 
       const review = await loadReview(productNameString, brandNameString);
 
-      await loadKeywords(review.text);
+      await Promise.all([
+        loadKeywords(review.text),
+        loadSentiment(review.text),
+      ]);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -98,6 +112,7 @@ export default function Main({
     <div
       style={{
         width: "100%",
+        maxWidth: "480px",
       }}
     >
       {isLoadingProduct ? (
@@ -150,13 +165,43 @@ export default function Main({
               marginTop: "20px",
             }}
           >
-            <img
-              style={{
-                width: "150px",
-              }}
-              src={ThumbsUp}
-              alt="Thumbs Up"
-            />
+            {isLoadingSentiment && (
+              <img
+                style={{
+                  width: "150px",
+                }}
+                src={Think}
+                alt="Think"
+              />
+            )}
+            {sentiment === "positive" && (
+              <img
+                style={{
+                  width: "150px",
+                }}
+                src={ThumbsUp}
+                alt="Thumbs Up"
+              />
+            )}
+            {sentiment === "neutral" && (
+              <img
+                style={{
+                  width: "150px",
+                }}
+                src={Think}
+                alt="Think"
+              />
+            )}
+            {sentiment === "negative" && (
+              <img
+                style={{
+                  width: "150px",
+                }}
+                src={ThumbsDown}
+                alt="Thumbs Down"
+              />
+            )}
+
             {isLoadingKeywords ? (
               <div
                 style={{
