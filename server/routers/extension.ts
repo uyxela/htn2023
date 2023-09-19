@@ -295,18 +295,29 @@ extensionRouter.post("/save-product", async (req, res) => {
   });
 
   const savedReviews = await Promise.all(
-    reviews.map(
-      async (review) =>
-        await prisma.review.create({
-          data: {
-            id: generateUuid(),
-            snippet: review.snippet,
-            title: review.title,
-            link: review.url,
-            productId: savedProduct.id,
-          },
-        })
-    )
+    reviews.map(async (review) => {
+      const existingReview = await prisma.review.findUnique({
+        where: {
+          link: review.url,
+        },
+      });
+
+      if (existingReview) {
+        return existingReview;
+      }
+
+      const newReview = await prisma.review.create({
+        data: {
+          id: generateUuid(),
+          snippet: review.snippet,
+          title: review.title,
+          link: review.url,
+          productId: savedProduct.id,
+        },
+      });
+
+      return newReview;
+    })
   );
 
   res.status(200).json({
